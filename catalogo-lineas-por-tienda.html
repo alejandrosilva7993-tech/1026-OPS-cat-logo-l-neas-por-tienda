@@ -1,0 +1,2542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de líneas por tienda</title>
+  <link href="https://unpkg.com/primeng@17.18.0/resources/themes/lara-light-blue/theme.css" rel="stylesheet">
+  <link href="https://unpkg.com/primeicons@7.0.0/primeicons.css" rel="stylesheet" crossorigin="anonymous">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --primary-color-hover: #0b5ed7;
+      --primary-color-active: #0a58ca;
+      --primary-color-text: #ffffff;
+      --primary-50: #eaf1fe;
+      --primary-100: #cfe2ff;
+      --focus-ring: rgba(13, 110, 253, 0.25);
+      --text-color: #212529;
+      --text-color-secondary: #6c757d;
+      --text-heading: #212529;
+      --surface-border: #dee2e6;
+      --surface-50: #f6f7f9;
+      --surface-100: #f3f4f6;
+      --surface-200: #e9ecef;
+      --surface-300: #ced4da;
+      --surface-700: #212529;
+      --surface-hover: #eef4ff;
+      --breadcrumb-link: #0d6efd;
+      --breadcrumb-link-hover: #0a58ca;
+      --breadcrumb-muted: #6c757d;
+      --btn-cancel: #6c757d;
+      --btn-cancel-hover: #5c636a;
+      --btn-success: #4caf50;
+      --btn-success-hover: #43a047;
+      --link-color: #0d6efd;
+      --link-hover: #0a58ca;
+      --danger-color: #dc3545;
+      --danger-hover: #bb2d3b;
+      --table-head-bg: #ffffff;
+      --table-border: #dee2e6;
+      --table-stripe: #f6f7f9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      background: #fff;
+      color: var(--text-color);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .pi { font-style: normal; display: inline-block; min-width: 1em; line-height: 1; }
+
+    .page-shell { min-height: 100vh; display: flex; flex-direction: column; }
+    .page-content {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 2.5rem;
+    }
+    .page-content--wide { max-width: 1280px; }
+
+    .breadcrumb { font-size: 0.875rem; color: var(--breadcrumb-muted); margin-bottom: 0.75rem; }
+    .breadcrumb ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; list-style: none; }
+    .breadcrumb li + li::before { content: "/"; margin-right: 0.35rem; color: var(--breadcrumb-muted); }
+    .breadcrumb a { color: var(--breadcrumb-link); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--breadcrumb-link-hover); text-decoration: underline; }
+    .breadcrumb li[aria-current="page"] { color: var(--breadcrumb-muted); }
+
+    .page-title { font-size: 1.8rem; font-weight: 600; color: var(--text-heading); margin-bottom: 1.25rem; }
+    .page-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .form-section { margin-bottom: 2rem; }
+    .section-head {
+      padding-bottom: 0.6rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--surface-200);
+    }
+    .section-title { font-size: 1.05rem; font-weight: 600; color: #334155; margin: 0; }
+
+    .form-grid { display: grid; gap: 1.1rem 1.5rem; }
+    .form-grid--2 { grid-template-columns: repeat(2, minmax(0, 440px)); }
+    .field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+    .field-label { font-size: 0.875rem; font-weight: 500; color: var(--text-color); }
+    .required-mark { color: #dc2626; margin-left: 0.15rem; }
+    .field-hint { display: none; }
+    .field-error { font-size: 0.75rem; color: #dc2626; }
+
+    .form-input, .form-select {
+      width: 100%;
+      min-height: 2.375rem;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.9rem;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+      background: #fff;
+      color: var(--text-color);
+      font-family: inherit;
+    }
+    .form-select {
+      padding-right: 2.25rem;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236c757d' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.85rem center;
+      background-size: 0.75rem 0.5rem;
+    }
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.2rem var(--focus-ring);
+    }
+    .form-input[readonly], .form-select:disabled {
+      background: #e9ecef;
+      color: var(--text-color-secondary);
+      opacity: 1;
+      cursor: not-allowed;
+    }
+    .form-input.is-interactive { cursor: text; }
+    .form-input.invalid, .form-select.invalid {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
+    }
+
+    .form-actions { display: flex; gap: 0.5rem; margin-top: 1.75rem; flex-wrap: wrap; }
+    .btn {
+      padding: 0.45rem 0.9rem;
+      min-height: 2.375rem;
+      min-width: 2.375rem;
+      border: 1px solid transparent;
+      background: #fff;
+      border-radius: 0.25rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: background-color .12s ease, border-color .12s ease, box-shadow .12s ease;
+    }
+    .btn:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem var(--focus-ring); }
+    .btn-secondary { background: var(--btn-cancel); color: #fff; border-color: var(--btn-cancel); }
+    .btn-secondary:hover:not(:disabled) { background: var(--btn-cancel-hover); border-color: var(--btn-cancel-hover); }
+    .btn-success { background: var(--btn-success); color: #fff; border-color: var(--btn-success); }
+    .btn-success:hover:not(:disabled) { background: var(--btn-success-hover); border-color: var(--btn-success-hover); }
+    .btn-primary { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-color-hover); border-color: var(--primary-color-active); }
+    .btn-outlined { background: #fff; color: #212529; border-color: #ced4da; font-weight: 500; }
+    .btn-outlined:hover:not(:disabled) { background: #f8f9fa; border-color: #adb5bd; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding-bottom: 0.75rem;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 40;
+    }
+    .table-toolbar__left, .table-toolbar__right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .table-toolbar__left {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    .btn-icon { padding: 0.45rem 0.7rem; gap: 0.4rem; }
+    .btn-icon .pi { font-size: 0.95rem; }
+    .btn-icon .pi-angle-down { font-size: 0.8rem; opacity: 0.9; }
+    #exportBtn[aria-expanded="true"] { background: #6c757d; border-color: #6c757d; color: #fff; }
+    #exportBtn[aria-expanded="true"]:hover { background: #5c636a; border-color: #5c636a; }
+
+    .col-chooser-inline { display: inline-block; }
+    .col-chooser-link {
+      font-size: 0.875rem;
+      color: var(--link-color);
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 500;
+      min-height: 2rem;
+    }
+    .col-chooser-link:hover { text-decoration: underline; color: var(--link-hover); }
+    .col-chooser-inline__panel { margin: 0.6rem 0 0.25rem; }
+    .col-chooser-inline__panel.hidden { display: none; }
+    .col-chooser-inline__items { display: flex; flex-wrap: wrap; gap: 0.55rem 1.5rem; margin-bottom: 0.85rem; }
+    .col-chooser-inline__item { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; cursor: pointer; }
+    .col-chooser-inline__item input { accent-color: var(--primary-color); width: 1rem; height: 1rem; }
+
+    .export-menu { position: relative; }
+    .export-menu__panel {
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      right: 0;
+      min-width: 220px;
+      background: #fff;
+      border: 1px solid var(--surface-200);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+      padding: 0.4rem 0;
+      z-index: 50;
+    }
+    .export-menu__panel.hidden { display: none; }
+    .export-menu__item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      width: 100%;
+      padding: 0.55rem 1.1rem;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #212529;
+      text-align: left;
+      cursor: pointer;
+    }
+    .export-menu__item:hover { background: #f1f5f9; }
+    .export-menu__item .pi { font-size: 1.05rem; width: 1.2rem; text-align: center; flex-shrink: 0; }
+    .export-menu__icon--blue { color: #3b82f6; }
+    .export-menu__icon--grey { color: #64748b; }
+    .export-menu__icon--red { color: #dc3545; }
+    .export-menu__icon--green { color: #217346; }
+
+    .card { background: #fff; overflow: visible; }
+    .data-table-scroll-pane { width: 100%; overflow-x: auto; }
+    .data-table {
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      width: 100%;
+      min-width: 1100px;
+      background: #fff;
+    }
+    .data-table th, .data-table td {
+      padding: 0.55rem 0.75rem;
+      text-align: center;
+      border: 1px solid var(--table-border);
+      vertical-align: middle;
+      max-width: 18rem;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .data-table thead tr.header-row { background: var(--table-head-bg); }
+    .data-table thead tr.header-row th {
+      font-weight: 700;
+      color: var(--link-color);
+      font-size: 0.875rem;
+      text-align: left;
+      border-bottom: 2px solid var(--table-border);
+      white-space: normal;
+    }
+    .data-table thead tr.header-row th.sortable { cursor: pointer; }
+    .data-table thead tr.header-row th.sortable:hover { background: #f8f9fa; }
+    .data-table thead tr.header-row th.sortable:hover .col-header-text { text-decoration: underline; }
+    .col-header-content { display: inline-flex; align-items: center; gap: 0.375rem; max-width: 100%; }
+    .col-header-text { white-space: normal; line-height: 1.3; }
+    .sort-icon { font-size: 0.75rem; color: var(--link-color); flex-shrink: 0; }
+
+    .data-table thead tr.filter-row { background: var(--table-head-bg); }
+    .data-table thead tr.filter-row th { padding: 6px 8px; font-weight: 400; vertical-align: middle; border-top: none; }
+    .table-filter-field { display: flex; align-items: center; gap: 4px; }
+    .table-filter-input {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      height: 34px;
+      padding: 0 8px;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      color: var(--text-color);
+      background: #fff;
+      outline: none;
+    }
+    .table-filter-input:focus {
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.2rem var(--focus-ring);
+    }
+
+    .data-table tbody tr { background: #fff; color: var(--text-color); }
+    .data-table tbody tr:nth-child(odd) { background: var(--table-stripe); }
+    .data-table tbody tr:hover td { background: var(--surface-hover); }
+    .data-table td.col-actions, .data-table th.col-actions { width: 130px; white-space: nowrap; max-width: none; }
+    .data-table td { text-align: left; }
+
+    .stores-count {
+      color: var(--link-color);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      border-radius: 0.2rem;
+      display: inline-block;
+      min-width: 1.5rem;
+      min-height: 1.5rem;
+      line-height: 1.5rem;
+      text-align: center;
+    }
+    .stores-count:hover { color: var(--link-hover); }
+    .stores-count:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem var(--focus-ring); }
+
+    /* Tooltip flotante (evita recortes del scroll de la tabla) */
+    .app-tooltip {
+      position: fixed;
+      z-index: 2000;
+      background: #212529;
+      color: #fff;
+      padding: 0.45rem 0.65rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1.35;
+      white-space: pre-line;
+      max-width: min(280px, calc(100vw - 24px));
+      text-align: left;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+      opacity: 0;
+      transition: opacity .1s ease;
+    }
+    .app-tooltip.is-visible { opacity: 1; }
+    .app-tooltip::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+    }
+    .app-tooltip[data-placement="top"]::after { top: 100%; border-top-color: #212529; }
+    .app-tooltip[data-placement="bottom"]::after { bottom: 100%; border-bottom-color: #212529; }
+
+    .row-actions { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .table-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--link-color);
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 0.25rem;
+    }
+    .table-action-btn:hover { color: var(--link-hover); background: var(--primary-50); }
+    .table-action-btn:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem var(--focus-ring); }
+    .table-action-btn--danger { color: var(--danger-color); }
+    .table-action-btn--danger:hover { color: var(--danger-hover); background: #fde8ea; }
+
+    .table-paginator {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0.85rem 0 0;
+    }
+    .table-paginator__cluster { display: inline-flex; align-items: center; gap: 0; flex-wrap: wrap; }
+    .table-paginator__pages { display: inline-flex; align-items: center; gap: 0; }
+    .table-pag-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+      height: 2rem;
+      padding: 0 0.5rem;
+      border: 1px solid #dee2e6;
+      margin-left: -1px;
+      border-radius: 0;
+      background: #fff;
+      color: var(--link-color);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    #pagFirst { border-top-left-radius: 0.25rem; border-bottom-left-radius: 0.25rem; margin-left: 0; }
+    #pagLast { border-top-right-radius: 0.25rem; border-bottom-right-radius: 0.25rem; }
+    .table-pag-btn:hover:not(:disabled) { background: #e9ecef; color: var(--link-hover); z-index: 1; }
+    .table-pag-btn.is-active {
+      background: var(--primary-color);
+      color: #fff;
+      border-color: var(--primary-color);
+      font-weight: 600;
+      z-index: 2;
+    }
+    .table-pag-btn:disabled { color: #adb5bd; background: #fff; cursor: default; pointer-events: none; }
+    .table-paginator__select {
+      height: 2rem;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      padding: 0 2rem 0 0.5rem;
+      margin-left: 0.75rem;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: #fff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236c757d' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.7rem center;
+      background-size: 0.75rem 0.5rem;
+    }
+    .grid-summary { font-size: 0.875rem; color: var(--text-color); margin: 0 0 0.5rem; }
+
+    .info-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-bottom: 1.25rem;
+    }
+    .info-callout .pi { color: #94a3b8; font-size: 1rem; margin-top: 0.1rem; flex-shrink: 0; }
+    .info-callout__title { font-weight: 700; color: #475569; }
+    .info-callout__detail { color: var(--text-color); }
+
+    .store-panel {
+      border: 1px solid var(--table-border);
+      border-radius: 0.35rem;
+      background: #fff;
+      max-height: 16rem;
+      overflow-y: auto;
+      padding: 0.35rem 0;
+    }
+    .store-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      width: 100%;
+      margin: 0;
+      padding: 0.55rem 0.85rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: var(--text-color);
+      min-height: 2.5rem;
+    }
+    .store-option:hover { background: var(--surface-hover); }
+    .store-option.is-checked { background: var(--primary-50); }
+    .store-option input {
+      accent-color: var(--primary-color);
+      width: 1.1rem;
+      height: 1.1rem;
+      margin-top: 0.15rem;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .store-option__text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .store-option__id { font-weight: 600; color: #334155; line-height: 1.3; }
+    .store-option__name { color: var(--text-color-secondary); line-height: 1.3; }
+    .store-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .store-select-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      min-height: 2rem;
+    }
+    .store-select-all input { accent-color: var(--primary-color); width: 1rem; height: 1rem; }
+    .store-empty {
+      padding: 1.25rem 0.85rem;
+      font-size: 0.875rem;
+      color: var(--text-color-secondary);
+      text-align: center;
+      border: 1px dashed var(--surface-300);
+      border-radius: 0.35rem;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .meta-item__label { font-size: 0.75rem; color: var(--text-color-secondary); margin-bottom: 0.2rem; }
+    .meta-item__value { font-size: 0.875rem; font-weight: 500; color: #334155; overflow-wrap: anywhere; }
+
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      border: 1px solid var(--table-border);
+      margin-bottom: 1.75rem;
+    }
+    .detail-table th, .detail-table td {
+      border: 1px solid var(--table-border);
+      padding: 0.6rem 0.85rem;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .detail-table tbody tr:nth-child(odd) { background: var(--table-stripe); }
+    .detail-table th {
+      width: 35%;
+      color: var(--surface-700);
+      font-weight: 700;
+      text-align: left;
+    }
+    .detail-table td { text-align: left; color: var(--text-color); }
+
+    .detail-count { font-size: 0.875rem; color: var(--text-color); margin-bottom: 0.5rem; }
+    .detail-store-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      border: 1px solid var(--table-border);
+    }
+    .detail-store-table th, .detail-store-table td {
+      padding: 0.55rem 0.85rem;
+      border: 1px solid var(--table-border);
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+    .detail-store-table thead th {
+      background: #fff;
+      color: var(--link-color);
+      font-weight: 700;
+      border-bottom-width: 2px;
+    }
+    .detail-store-table tbody tr:nth-child(odd) { background: var(--table-stripe); }
+
+    /* Wizard Importar (Selección / Importación) */
+    .import-wizard { max-width: 1100px; margin: 0 auto; }
+    .import-wizard__title {
+      text-align: center;
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #334155;
+      margin: 0.25rem 0 1.5rem;
+    }
+    .import-stepper {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 1.25rem;
+      padding: 0 1rem;
+    }
+    .import-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 7rem;
+      position: relative;
+      flex: 1;
+      max-width: 14rem;
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: default;
+      color: #94a3b8;
+    }
+    .import-step.is-clickable { cursor: pointer; }
+    .import-step__num {
+      width: 1.85rem;
+      height: 1.85rem;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      background: #fff;
+      color: #94a3b8;
+      z-index: 1;
+    }
+    .import-step__label { font-size: 0.9rem; font-weight: 500; }
+    .import-step.is-active { color: #334155; }
+    .import-step.is-active .import-step__num {
+      border-color: #3d4f76;
+      background: #3d4f76;
+      color: #fff;
+    }
+    .import-step.is-active .import-step__label { color: #3d4f76; font-weight: 600; }
+    .import-step.is-done .import-step__num {
+      border-color: #3d4f76;
+      color: #3d4f76;
+      background: #fff;
+    }
+    .import-step.is-done .import-step__label { color: #475569; }
+    .import-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 0.9rem;
+      left: calc(50% + 1.05rem);
+      right: calc(-50% + 1.05rem);
+      height: 3px;
+      background: #cbd5e1;
+      z-index: 0;
+    }
+    .import-step.is-active:not(:last-child)::after,
+    .import-step.is-done:not(:last-child)::after { background: #3d4f76; }
+
+    .import-panel {
+      border-top: 1px solid var(--surface-200);
+      border-bottom: 1px solid var(--surface-200);
+      padding: 1.25rem 0 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .import-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem 2rem;
+      align-items: start;
+    }
+    .import-action-col { min-width: 0; }
+    .import-action-col__title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #3d4f76;
+      margin-bottom: 0.85rem;
+    }
+    .import-action-col.is-disabled { opacity: 0.55; pointer-events: none; }
+    .import-action-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 0.65rem; }
+    .btn-navy {
+      background: #3d4f76;
+      color: #fff;
+      border-color: #3d4f76;
+      min-width: 7.5rem;
+    }
+    .btn-navy:hover:not(:disabled) { background: #324264; border-color: #324264; color: #fff; }
+    .btn-navy:disabled { background: #c5cad3; border-color: #c5cad3; color: #fff; opacity: 1; }
+    .import-file-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.65rem 0.75rem;
+      width: 100%;
+    }
+    .import-file-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      max-width: min(100%, 16rem);
+      min-height: 2.1rem;
+      padding: 0.25rem 0.45rem 0.25rem 0.7rem;
+      background: #e9ecef;
+      border-radius: 999px;
+      color: #495057;
+      font-size: 0.8125rem;
+      line-height: 1.2;
+    }
+    .import-file-chip[hidden] { display: none !important; }
+    .import-file-chip__name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 12.5rem;
+    }
+    .import-file-chip__clear {
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: #495057;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      font-size: 0.75rem;
+    }
+    .import-file-chip__clear:hover { background: rgba(73, 80, 87, 0.12); color: #212529; }
+    .import-file-chip__clear:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem var(--focus-ring); }
+    .import-check {
+      display: inline-flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+      font-size: 0.8125rem;
+      color: #475569;
+      cursor: pointer;
+      max-width: 16rem;
+      line-height: 1.35;
+    }
+    .import-check input { margin-top: 0.15rem; accent-color: #3d4f76; width: 1rem; height: 1rem; flex-shrink: 0; }
+    .import-offset { display: flex; flex-direction: column; gap: 0.3rem; width: 100%; max-width: 11rem; }
+    .import-offset__label { font-size: 0.8125rem; color: #64748b; }
+    .import-offset .form-input { background: #f1f3f5; }
+
+    .import-mapping {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .import-map-row {
+      display: grid;
+      grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr) 2rem;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 0;
+    }
+    .import-map-row__label {
+      font-size: 0.875rem;
+      color: #64748b;
+      overflow-wrap: anywhere;
+    }
+    .import-map-row__edit {
+      width: 1.85rem;
+      height: 1.85rem;
+      border: 1px solid #ced4da;
+      border-radius: 0.2rem;
+      background: #fff;
+      color: #64748b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+    }
+    .import-map-row__edit:hover { background: #f8f9fa; color: #334155; }
+    .import-map-row__edit:focus-visible { outline: none; box-shadow: 0 0 0 0.2rem var(--focus-ring); }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin: 1.25rem 0;
+    }
+    .summary-card {
+      border: 1px solid var(--table-border);
+      border-radius: 0.35rem;
+      padding: 0.85rem 1rem;
+      background: #fff;
+    }
+    .summary-card__label { font-size: 0.75rem; color: var(--text-color-secondary); margin-bottom: 0.25rem; }
+    .summary-card__value { font-size: 1.35rem; font-weight: 700; color: #334155; }
+    .summary-card--ok .summary-card__value { color: var(--btn-success); }
+    .summary-card--upd .summary-card__value { color: var(--primary-color); }
+    .summary-card--rej .summary-card__value { color: var(--danger-color); }
+
+    @media (max-width: 900px) {
+      .import-actions-grid { grid-template-columns: 1fr; }
+      .import-mapping { grid-template-columns: 1fr; }
+      .import-map-row { grid-template-columns: minmax(6rem, 9rem) minmax(0, 1fr) 2rem; }
+      .import-step:not(:last-child)::after { display: none; }
+    }
+
+    .view-hidden { display: none !important; }
+    .hidden { display: none !important; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 1200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+      width: 100%;
+      max-width: 420px;
+      padding: 1.25rem;
+      max-height: calc(100vh - 2rem);
+      overflow: auto;
+    }
+    .modal-card__title { font-size: 1rem; font-weight: 600; color: #334155; margin-bottom: 0.75rem; }
+    .modal-card__body { font-size: 0.875rem; color: var(--text-color); margin-bottom: 1.25rem; line-height: 1.5; }
+    .modal-card__actions { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; }
+
+    .p-toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 25rem;
+      max-width: calc(100% - 40px);
+      z-index: 1300;
+    }
+    .p-toast .p-toast-message { margin: 0 0 1rem 0; overflow: hidden; }
+    .p-toast .p-toast-message-content { display: flex; align-items: flex-start; }
+    .p-toast .p-toast-message-text { flex: 1 1 auto; }
+    .p-toast .p-toast-message .p-toast-message-content { padding: 1rem 1rem 1rem 1.25rem; }
+    .p-toast .p-toast-message .p-toast-message-content .p-toast-message-icon {
+      font-size: 1.25rem;
+      margin-top: 0.15rem;
+    }
+    .p-toast .p-toast-message .p-toast-message-content .p-toast-message-text { margin: 0 0 0 0.75rem; }
+    .p-toast .p-toast-icon-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    .page-footer {
+      margin-top: auto;
+      padding: 0.65rem 1rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      background: #f3f4f6;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    @media (max-width: 900px) {
+      .form-grid--2 { grid-template-columns: minmax(0, 460px); max-width: 100%; }
+      .meta-grid, .summary-cards { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .page-content { padding: 1rem; }
+      .form-grid--2 { grid-template-columns: 1fr; }
+      .page-title { font-size: 1.45rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <main class="page-content page-content--wide" id="mainContent">
+
+      <!-- LISTADO -->
+      <div id="listView">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="#">Catálogos</a></li>
+            <li aria-current="page">Líneas por tienda</li>
+          </ol>
+        </nav>
+        <div class="page-header-row">
+          <h1 class="page-title" style="margin-bottom:0">Líneas por tienda</h1>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="table-toolbar__left">
+            <div class="toolbar-actions">
+              <button type="button" class="btn btn-success" id="goCreateBtn">Crear línea</button>
+              <button type="button" class="btn btn-primary btn-icon" id="goBulkBtn" aria-label="Importar líneas">
+                <i class="pi pi-upload" aria-hidden="true"></i>
+                Importar líneas
+              </button>
+            </div>
+            <div class="col-chooser-inline" id="listColChooser">
+              <a href="#" class="col-chooser-link" id="listColChooserBtn" role="button" aria-expanded="false" aria-controls="listColChooserPanel">Mostrar/Ocultar Columnas</a>
+            </div>
+          </div>
+          <div class="table-toolbar__right">
+            <div class="export-menu">
+              <button type="button" class="btn btn-outlined btn-icon" id="exportBtn" aria-haspopup="true" aria-expanded="false" aria-controls="exportMenuPanel" title="Exportar registros">
+                <i class="pi pi-external-link" aria-hidden="true"></i>
+                <i class="pi pi-angle-down" aria-hidden="true"></i>
+              </button>
+              <div id="exportMenuPanel" class="export-menu__panel hidden" role="menu" aria-label="Exportar registros"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-chooser-inline__panel hidden" id="listColChooserPanel"></div>
+        <div class="grid-summary" id="listSummary"></div>
+
+        <div class="card">
+          <div class="data-table-scroll-pane">
+            <table class="data-table" id="listTable">
+              <thead>
+                <tr class="header-row" id="listTableHead"></tr>
+                <tr class="filter-row" id="listTableFilterRow"></tr>
+              </thead>
+              <tbody id="listTableBody"></tbody>
+            </table>
+          </div>
+          <nav class="table-paginator" aria-label="Paginación">
+            <div class="table-paginator__cluster">
+              <button type="button" class="table-pag-btn" id="pagFirst" aria-label="Primera página"><i class="pi pi-angle-double-left"></i></button>
+              <button type="button" class="table-pag-btn" id="pagPrev" aria-label="Página anterior"><i class="pi pi-angle-left"></i></button>
+              <div class="table-paginator__pages" id="pagPages"></div>
+              <button type="button" class="table-pag-btn" id="pagNext" aria-label="Página siguiente"><i class="pi pi-angle-right"></i></button>
+              <button type="button" class="table-pag-btn" id="pagLast" aria-label="Última página"><i class="pi pi-angle-double-right"></i></button>
+              <select id="pageSizeSelect" class="table-paginator__select" aria-label="Registros por página">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      <!-- CREAR -->
+      <div id="createView" class="view-hidden">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="#" data-nav="list">Catálogos</a></li>
+            <li><a href="#" data-nav="list">Líneas por tienda</a></li>
+            <li aria-current="page">Crear línea</li>
+          </ol>
+        </nav>
+        <h1 class="page-title">Crear línea</h1>
+        <div id="createFormRoot"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" data-nav="list">Cancelar</button>
+          <button type="button" class="btn btn-success" id="createSubmitBtn">Crear</button>
+        </div>
+      </div>
+
+      <!-- EDITAR -->
+      <div id="editView" class="view-hidden">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="#" data-nav="list">Catálogos</a></li>
+            <li><a href="#" data-nav="list">Líneas por tienda</a></li>
+            <li aria-current="page" id="editBreadcrumbCurrent">Editar línea</li>
+          </ol>
+        </nav>
+        <h1 class="page-title" id="editPageTitle">Editar línea</h1>
+        <div id="editFormRoot"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" data-nav="list">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="editSubmitBtn">Actualizar</button>
+        </div>
+      </div>
+
+      <!-- DETALLE -->
+      <div id="detailView" class="view-hidden">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="#" data-nav="list">Catálogos</a></li>
+            <li><a href="#" data-nav="list">Líneas por tienda</a></li>
+            <li aria-current="page" id="detailBreadcrumbCurrent">Ver detalle</li>
+          </ol>
+        </nav>
+        <h1 class="page-title" id="detailPageTitle">Ver detalle</h1>
+        <div class="page-header-row" style="margin-bottom:1.25rem">
+          <button type="button" class="btn btn-primary" id="detailEditBtn">Editar</button>
+        </div>
+        <div id="detailFormRoot"></div>
+      </div>
+
+      <!-- IMPORTAR LÍNEAS (wizard OPS) -->
+      <div id="bulkView" class="view-hidden">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="#" data-nav="list">Catálogos</a></li>
+            <li><a href="#" data-nav="list">Líneas por tienda</a></li>
+            <li aria-current="page">Importar líneas</li>
+          </ol>
+        </nav>
+
+        <div class="import-wizard">
+          <h1 class="import-wizard__title">Importar líneas</h1>
+
+          <div class="import-stepper" role="navigation" aria-label="Pasos de importación">
+            <button type="button" class="import-step is-active" data-import-step="1" id="importStep1">
+              <span class="import-step__num">1</span>
+              <span class="import-step__label">Selección</span>
+            </button>
+            <button type="button" class="import-step" data-import-step="2" id="importStep2">
+              <span class="import-step__num">2</span>
+              <span class="import-step__label">Importación</span>
+            </button>
+          </div>
+
+          <div class="import-panel">
+            <div class="import-actions-grid">
+              <div class="import-action-col" id="importColSelection">
+                <div class="import-action-col__title">Escoge y carga un archivo</div>
+                <div class="import-action-stack">
+                  <input type="file" id="bulkFileInput" accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+                  <div class="import-file-row">
+                    <button type="button" class="btn btn-navy" id="bulkPickBtn">Examinar</button>
+                    <div class="import-file-chip" id="bulkFileChip" hidden>
+                      <span class="import-file-chip__name" id="bulkFileName"></span>
+                      <button type="button" class="import-file-chip__clear" id="bulkFileClearBtn" title="Quitar archivo" aria-label="Quitar archivo seleccionado">
+                        <i class="pi pi-times" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <label class="import-check">
+                    <input type="checkbox" id="bulkHasHeader" checked>
+                    <span>La primera línea del archivo es una cabecera</span>
+                  </label>
+                  <div class="import-offset">
+                    <label class="import-offset__label" for="bulkOffset">Desplazamiento</label>
+                    <input type="number" min="0" step="1" class="form-input" id="bulkOffset" value="0" inputmode="numeric">
+                  </div>
+                  <span class="field-error" id="bulkFileError" hidden></span>
+                </div>
+              </div>
+
+              <div class="import-action-col is-disabled" id="importColImport">
+                <div class="import-action-col__title">Importar archivo</div>
+                <div class="import-action-stack">
+                  <button type="button" class="btn btn-navy" id="bulkProcessBtn" disabled>Importar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="import-mapping" id="importMapping" aria-label="Mapeo de campos del archivo">
+            <div class="import-map-row">
+              <label class="import-map-row__label" for="map-consignatario">Consignatario<span class="required-mark">*</span></label>
+              <select id="map-consignatario" class="form-select" data-map-field="consignatario" aria-required="true">
+                <option value="">(Sin información)</option>
+              </select>
+              <button type="button" class="import-map-row__edit" data-focus-map="map-consignatario" title="Editar mapeo" aria-label="Editar mapeo de Consignatario"><i class="pi pi-pencil" aria-hidden="true"></i></button>
+            </div>
+            <div class="import-map-row">
+              <label class="import-map-row__label" for="map-descripcion">Descripción<span class="required-mark">*</span></label>
+              <select id="map-descripcion" class="form-select" data-map-field="descripcion" aria-required="true">
+                <option value="">(Sin información)</option>
+              </select>
+              <button type="button" class="import-map-row__edit" data-focus-map="map-descripcion" title="Editar mapeo" aria-label="Editar mapeo de Descripción"><i class="pi pi-pencil" aria-hidden="true"></i></button>
+            </div>
+            <div class="import-map-row">
+              <label class="import-map-row__label" for="map-linea">Línea<span class="required-mark">*</span></label>
+              <select id="map-linea" class="form-select" data-map-field="linea" aria-required="true">
+                <option value="">(Sin información)</option>
+              </select>
+              <button type="button" class="import-map-row__edit" data-focus-map="map-linea" title="Editar mapeo" aria-label="Editar mapeo de Línea"><i class="pi pi-pencil" aria-hidden="true"></i></button>
+            </div>
+            <div class="import-map-row">
+              <label class="import-map-row__label" for="map-tienda">Tienda<span class="required-mark">*</span></label>
+              <select id="map-tienda" class="form-select" data-map-field="tienda" aria-required="true">
+                <option value="">(Sin información)</option>
+              </select>
+              <button type="button" class="import-map-row__edit" data-focus-map="map-tienda" title="Editar mapeo" aria-label="Editar mapeo de Tienda"><i class="pi pi-pencil" aria-hidden="true"></i></button>
+            </div>
+          </div>
+
+          <div id="bulkSummary" class="view-hidden" aria-live="polite">
+            <div class="section-head"><h2 class="section-title">Resumen de importación</h2></div>
+            <div class="summary-cards">
+              <div class="summary-card summary-card--ok">
+                <div class="summary-card__label">Creados</div>
+                <div class="summary-card__value" id="bulkCreatedCount">0</div>
+              </div>
+              <div class="summary-card summary-card--upd">
+                <div class="summary-card__label">Actualizados</div>
+                <div class="summary-card__value" id="bulkUpdatedCount">0</div>
+              </div>
+              <div class="summary-card summary-card--rej">
+                <div class="summary-card__label">Rechazados</div>
+                <div class="summary-card__value" id="bulkRejectedCount">0</div>
+              </div>
+            </div>
+            <div class="detail-count" id="bulkRejectedTitle" hidden>Detalle de rechazados</div>
+            <div class="data-table-scroll-pane" id="bulkRejectedWrap" hidden>
+              <table class="detail-store-table" id="bulkRejectedTable">
+                <thead>
+                  <tr>
+                    <th>Fila</th>
+                    <th>Consignatario</th>
+                    <th>Línea</th>
+                    <th>Tienda</th>
+                    <th>Motivo</th>
+                  </tr>
+                </thead>
+                <tbody id="bulkRejectedBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" data-nav="list">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="page-footer">3.35.134 ©Netlogistik 2026</footer>
+  </div>
+
+  <!-- Modal eliminar MSG004 -->
+  <div id="deleteModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-card">
+      <div class="modal-card__title" id="deleteModalTitle">Eliminar línea</div>
+      <div class="modal-card__body" id="deleteModalBody">¿Estás seguro de eliminar este registro? Esta acción no puede revertirse.</div>
+      <div class="modal-card__actions">
+        <button type="button" class="btn btn-secondary" id="deleteCancelBtn">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="deleteConfirmBtn">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="p-toast p-toast-top-right" role="region" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = 'opsLinesByStoreCatalogCm_v2';
+      var CURRENT_USER = 'admin.wms';
+      var DESC_MAX = 50;
+
+      var CONSIGNATARIOS = [
+        { id: 'CON-001', nombre: 'Grupo Comercial del Norte' },
+        { id: 'CON-002', nombre: 'Distribuidora Península' },
+        { id: 'CON-003', nombre: 'Abarrotes del Bajío' },
+        { id: 'CON-004', nombre: 'Consorcio Retail Centro' },
+        { id: 'CON-005', nombre: 'Logística Pacífico' }
+      ];
+
+      var TIENDAS = [
+        { id: 'TDA-001', nombre: 'Tienda Centro CDMX', consignatario: 'CON-001' },
+        { id: 'TDA-002', nombre: 'Tienda Reforma', consignatario: 'CON-001' },
+        { id: 'TDA-003', nombre: 'Tienda Polanco', consignatario: 'CON-001' },
+        { id: 'TDA-004', nombre: 'Tienda Guadalajara Sur', consignatario: 'CON-002' },
+        { id: 'TDA-005', nombre: 'Tienda Zapopan Centro', consignatario: 'CON-002' },
+        { id: 'TDA-006', nombre: 'Tienda Monterrey Valle', consignatario: 'CON-002' },
+        { id: 'TDA-007', nombre: 'Tienda Puebla Angelópolis', consignatario: 'CON-003' },
+        { id: 'TDA-008', nombre: 'Tienda Querétaro Juriquilla', consignatario: 'CON-003' },
+        { id: 'TDA-009', nombre: 'Tienda León Poniente', consignatario: 'CON-003' },
+        { id: 'TDA-010', nombre: 'Tienda Mérida Norte', consignatario: 'CON-004' },
+        { id: 'TDA-011', nombre: 'Tienda Cancún Centro', consignatario: 'CON-004' },
+        { id: 'TDA-012', nombre: 'Tienda Campeche', consignatario: 'CON-004' },
+        { id: 'TDA-013', nombre: 'Tienda Tijuana Río', consignatario: 'CON-005' },
+        { id: 'TDA-014', nombre: 'Tienda Mexicali', consignatario: 'CON-005' },
+        { id: 'TDA-015', nombre: 'Tienda Ensenada', consignatario: 'CON-005' }
+      ];
+
+      var EXPORT_FORMATS = [
+        { id: 'html', label: 'HTML', icon: 'pi-file', color: 'blue' },
+        { id: 'csv', label: 'CSV', icon: 'pi-file', color: 'blue' },
+        { id: 'text', label: 'Text', icon: 'pi-file', color: 'grey' },
+        { id: 'pdf', label: 'PDF', icon: 'pi-file-pdf', color: 'red' },
+        { id: 'xls', label: 'Excel 95 +', icon: 'pi-file-excel', color: 'green' },
+        { id: 'xlsx', label: 'Excel 2007 +', icon: 'pi-file-excel', color: 'green' }
+      ];
+
+      var COLUMNS = [
+        { key: 'linea', label: 'Línea', visible: true },
+        { key: 'descripcion', label: 'Descripción', visible: true },
+        { key: 'consignatarioNombre', label: 'Consignatario', visible: true },
+        { key: 'tiendasCount', label: 'Número de tiendas asignadas', visible: true },
+        { key: 'updatedBy', label: 'Actualizado por', visible: true },
+        { key: 'updatedAt', label: 'Actualizado', visible: true },
+        { key: 'createdAt', label: 'Creado', visible: true }
+      ];
+
+      var listState = { filters: {}, page: 1, pageSize: 10, sortKey: 'linea', sortDir: 'asc' };
+      var editingId = null;
+      var deletingId = null;
+      var lastDetailId = null;
+      var forms = {};
+      var IMPORT_FIELDS = [
+        { key: 'consignatario', label: 'Consignatario', aliases: ['consignatario'] },
+        { key: 'linea', label: 'Línea', aliases: ['linea', 'line'] },
+        { key: 'descripcion', label: 'Descripción', aliases: ['descripcion', 'description'] },
+        { key: 'tienda', label: 'Tienda', aliases: ['tienda', 'store'] }
+      ];
+      var bulkState = {
+        step: 1,
+        file: null,
+        headers: [],
+        rows: [],
+        mapping: { consignatario: '', linea: '', descripcion: '', tienda: '' }
+      };
+
+      function uid() {
+        return 'LIN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+      }
+
+      function consignatarioName(id) {
+        var c = CONSIGNATARIOS.find(function (x) { return x.id === id; });
+        return c ? c.nombre : id;
+      }
+
+      function consignatarioByLabel(label) {
+        var raw = String(label || '').trim().toLowerCase();
+        if (!raw) return null;
+        return CONSIGNATARIOS.find(function (c) {
+          return c.id.toLowerCase() === raw || c.nombre.toLowerCase() === raw;
+        }) || null;
+      }
+
+      function storeById(id) {
+        return TIENDAS.find(function (t) { return t.id === id; }) || null;
+      }
+
+      function storeByLabel(label) {
+        var raw = String(label || '').trim().toLowerCase();
+        if (!raw) return null;
+        return TIENDAS.find(function (t) {
+          return t.id.toLowerCase() === raw || t.nombre.toLowerCase() === raw;
+        }) || null;
+      }
+
+      function storeLabel(id) {
+        var s = storeById(id);
+        return s ? s.id + ' — ' + s.nombre : id;
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function formatDateTime(iso) {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleString('es-MX', {
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit'
+        });
+      }
+
+      function formatDateTimeLong(iso) {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleString('es-MX', {
+          day: 'numeric', month: 'long', year: 'numeric',
+          hour: 'numeric', minute: '2-digit', second: '2-digit',
+          timeZoneName: 'short'
+        });
+      }
+
+      function seedRecords() {
+        var users = ['jperez', 'mlopez', 'admin.wms', 'rgarcia', 'acastillo'];
+        var seed = [
+          { consignatario: 'CON-001', linea: 1, descripcion: 'Prioridad centro metropolitano', tiendas: ['TDA-001', 'TDA-002'] },
+          { consignatario: 'CON-001', linea: 2, descripcion: 'Cobertura secundaria CDMX', tiendas: [] },
+          { consignatario: 'CON-002', linea: 1, descripcion: 'Línea principal occidente', tiendas: ['TDA-004'] },
+          { consignatario: 'CON-002', linea: 2, descripcion: 'Expansión Monterrey', tiendas: ['TDA-006'] },
+          { consignatario: 'CON-003', linea: 1, descripcion: 'Corredor Bajío', tiendas: ['TDA-007', 'TDA-008'] },
+          { consignatario: 'CON-004', linea: 1, descripcion: 'Sureste turístico', tiendas: ['TDA-010'] },
+          { consignatario: 'CON-005', linea: 1, descripcion: 'Frontera noroeste', tiendas: ['TDA-013'] },
+          { consignatario: 'CON-005', linea: 2, descripcion: 'Litoral pacífico', tiendas: ['TDA-015'] }
+        ];
+        return seed.map(function (item, i) {
+          var created = new Date(2026, 1, 2 + i * 2, 9 + (i % 6), 10, 0);
+          var updated = new Date(2026, 9, 1 + i, 11, 20, 0);
+          return {
+            id: 'LIN-SEED-' + String(i + 1).padStart(3, '0'),
+            consignatario: item.consignatario,
+            linea: item.linea,
+            descripcion: item.descripcion,
+            tiendas: item.tiendas.slice(),
+            updatedBy: users[i % users.length],
+            updatedAt: updated.toISOString(),
+            createdAt: created.toISOString(),
+            deleted: false
+          };
+        });
+      }
+
+      var Store = {
+        load: function () {
+          try {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) {
+              var seed = seedRecords();
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+              return seed;
+            }
+            return JSON.parse(raw);
+          } catch (e) {
+            return seedRecords();
+          }
+        },
+        saveAll: function (records) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        },
+        getActive: function () {
+          return Store.load().filter(function (r) { return !r.deleted; });
+        },
+        getById: function (id) {
+          return Store.load().find(function (r) { return r.id === id && !r.deleted; }) || null;
+        },
+        findByConsignatarioLinea: function (consignatario, linea) {
+          return Store.getActive().find(function (r) {
+            return r.consignatario === consignatario && Number(r.linea) === Number(linea);
+          }) || null;
+        },
+        lineExists: function (consignatario, linea, excludeId) {
+          return Store.getActive().some(function (r) {
+            return r.consignatario === consignatario &&
+              Number(r.linea) === Number(linea) &&
+              (!excludeId || r.id !== excludeId);
+          });
+        },
+        findLineWithStore: function (consignatario, storeId, excludeId) {
+          return Store.getActive().find(function (r) {
+            return r.consignatario === consignatario &&
+              (r.tiendas || []).indexOf(storeId) !== -1 &&
+              (!excludeId || r.id !== excludeId);
+          }) || null;
+        },
+        create: function (record) {
+          var all = Store.load();
+          all.push(record);
+          Store.saveAll(all);
+          return record;
+        },
+        update: function (id, patch) {
+          var all = Store.load();
+          var idx = all.findIndex(function (r) { return r.id === id; });
+          if (idx === -1) return null;
+          all[idx] = Object.assign({}, all[idx], patch);
+          Store.saveAll(all);
+          return all[idx];
+        },
+        softDelete: function (id) {
+          return Store.update(id, { deleted: true });
+        }
+      };
+
+      function decorate(row) {
+        return Object.assign({}, row, {
+          consignatarioNombre: consignatarioName(row.consignatario),
+          tiendasCount: (row.tiendas || []).length
+        });
+      }
+
+      function showToast(detail, summary, severity) {
+        severity = severity || 'success';
+        var iconMap = {
+          success: 'pi-check',
+          info: 'pi-info-circle',
+          warn: 'pi-exclamation-triangle',
+          error: 'pi-times-circle'
+        };
+        var container = document.getElementById('toast');
+        var msg = document.createElement('div');
+        msg.className = 'p-toast-message p-toast-message-' + severity + ' p-toast-message-enter-done';
+        msg.setAttribute('role', 'alert');
+        msg.innerHTML =
+          '<div class="p-toast-message-content">' +
+            '<span class="p-toast-message-icon pi ' + (iconMap[severity] || 'pi-check') + '"></span>' +
+            '<div class="p-toast-message-text">' +
+              '<span class="p-toast-summary">' + escapeHtml(summary || '') + '</span>' +
+              '<div class="p-toast-detail">' + escapeHtml(detail) + '</div>' +
+            '</div>' +
+            '<button type="button" class="p-toast-icon-close p-link" aria-label="Cerrar">' +
+              '<span class="p-toast-icon-close-icon pi pi-times"></span>' +
+            '</button>' +
+          '</div>';
+        container.appendChild(msg);
+        var close = function () { if (msg.parentNode) msg.parentNode.removeChild(msg); };
+        msg.querySelector('.p-toast-icon-close').addEventListener('click', close);
+        setTimeout(close, 3500);
+      }
+
+      function showView(name) {
+        ['list', 'create', 'edit', 'detail', 'bulk'].forEach(function (v) {
+          document.getElementById(v + 'View').classList.toggle('view-hidden', v !== name);
+        });
+        document.getElementById('mainContent').classList.toggle('page-content--wide', name === 'list' || name === 'bulk');
+        if (name === 'list') renderList();
+        window.scrollTo(0, 0);
+      }
+
+      /* ---- Formulario línea ---- */
+      function LineForm(prefix, mode) {
+        this.prefix = prefix;
+        this.mode = mode;
+        this.selectedStores = {};
+        this.lockKeys = mode === 'edit';
+      }
+
+      LineForm.prototype.el = function (suffix) {
+        return document.getElementById(this.prefix + '-' + suffix);
+      };
+
+      LineForm.prototype.mount = function (root) {
+        var p = this.prefix;
+        var lock = this.lockKeys;
+        root.innerHTML =
+          '<section class="form-section">' +
+            '<div class="section-head"><h2 class="section-title">Información de la línea</h2></div>' +
+            '<div class="form-grid form-grid--2">' +
+              '<div class="field">' +
+                '<label class="field-label" for="' + p + '-consignatario">Consignatario<span class="required-mark">*</span></label>' +
+                '<select id="' + p + '-consignatario" class="form-select" ' + (lock ? 'disabled' : '') + ' aria-required="true">' +
+                  '<option value="">Selecciona un consignatario</option>' +
+                  CONSIGNATARIOS.map(function (c) {
+                    return '<option value="' + c.id + '">' + escapeHtml(c.nombre) + '</option>';
+                  }).join('') +
+                '</select>' +
+                '<span class="field-error" id="' + p + '-consignatario-error" hidden></span>' +
+              '</div>' +
+              '<div class="field">' +
+                '<label class="field-label" for="' + p + '-linea">Línea<span class="required-mark">*</span></label>' +
+                '<input id="' + p + '-linea" type="number" min="1" step="1" class="form-input' + (lock ? '' : ' is-interactive') + '" ' + (lock ? 'readonly' : '') + ' aria-required="true" placeholder="1">' +
+                '<span class="field-hint">Número entero único por consignatario. Inicia en 1.</span>' +
+                '<span class="field-error" id="' + p + '-linea-error" hidden></span>' +
+              '</div>' +
+              '<div class="field" style="grid-column:1 / -1; max-width:440px">' +
+                '<label class="field-label" for="' + p + '-descripcion">Descripción<span class="required-mark">*</span></label>' +
+                '<input id="' + p + '-descripcion" type="text" class="form-input is-interactive" maxlength="' + DESC_MAX + '" aria-required="true" placeholder="Descripción de la línea">' +
+                '<span class="field-hint">Alfanumérico obligatorio, máximo ' + DESC_MAX + ' caracteres.</span>' +
+                '<span class="field-error" id="' + p + '-descripcion-error" hidden></span>' +
+              '</div>' +
+            '</div>' +
+          '</section>' +
+          '<section class="form-section hidden" id="' + p + '-stores-section">' +
+            '<div class="section-head"><h2 class="section-title">Tiendas</h2></div>' +
+            '<div class="store-empty hidden" id="' + p + '-store-empty">No hay tiendas disponibles para este consignatario.</div>' +
+            '<div id="' + p + '-store-picker" class="hidden">' +
+              '<div class="store-toolbar">' +
+                '<label class="store-select-all"><input type="checkbox" id="' + p + '-store-all"> Seleccionar todas las disponibles</label>' +
+              '</div>' +
+              '<div class="store-panel" id="' + p + '-store-rows" role="group" aria-label="Tiendas disponibles"></div>' +
+            '</div>' +
+            '<span class="field-error" id="' + p + '-tiendas-error" hidden style="margin-top:0.5rem"></span>' +
+          '</section>';
+
+        this.bindEvents();
+        this.renderStores();
+      };
+
+      LineForm.prototype.bindEvents = function () {
+        var self = this;
+        var cons = this.el('consignatario');
+        if (cons && !this.lockKeys) {
+          cons.addEventListener('change', function () {
+            self.selectedStores = {};
+            self.clearError('tiendas');
+            self.renderStores();
+          });
+        }
+        var all = this.el('store-all');
+        if (all) {
+          all.addEventListener('change', function () {
+            var available = self.getAvailableStores();
+            if (all.checked) {
+              available.forEach(function (s) { self.selectedStores[s.id] = true; });
+            } else {
+              self.selectedStores = {};
+            }
+            self.renderStores();
+          });
+        }
+      };
+
+      LineForm.prototype.getAvailableStores = function () {
+        var cons = this.el('consignatario').value;
+        if (!cons) return [];
+        var excludeId = this.mode === 'edit' ? editingId : null;
+        return TIENDAS.filter(function (t) {
+          if (t.consignatario !== cons) return false;
+          // Excluye la línea en edición para que sus tiendas sigan disponibles.
+          return !Store.findLineWithStore(cons, t.id, excludeId);
+        });
+      };
+
+      LineForm.prototype.renderStores = function () {
+        var section = this.el('stores-section');
+        var container = this.el('store-rows');
+        var empty = this.el('store-empty');
+        var picker = this.el('store-picker');
+        var available = this.getAvailableStores();
+        var hasConsignatario = !!this.el('consignatario').value;
+        container.innerHTML = '';
+
+        if (!hasConsignatario) {
+          section.classList.add('hidden');
+          picker.classList.add('hidden');
+          empty.classList.add('hidden');
+          this.el('store-all').checked = false;
+          return;
+        }
+
+        section.classList.remove('hidden');
+
+        if (!available.length) {
+          picker.classList.add('hidden');
+          empty.classList.remove('hidden');
+          empty.textContent = 'No hay tiendas disponibles para este consignatario.';
+          this.el('store-all').checked = false;
+          return;
+        }
+
+        empty.classList.add('hidden');
+        picker.classList.remove('hidden');
+
+        var self = this;
+        available.forEach(function (store) {
+          var checked = !!self.selectedStores[store.id];
+          var option = document.createElement('label');
+          option.className = 'store-option' + (checked ? ' is-checked' : '');
+          option.innerHTML =
+            '<input type="checkbox" data-store-id="' + store.id + '" ' + (checked ? 'checked' : '') + '>' +
+            '<span class="store-option__text">' +
+              '<span class="store-option__id">' + escapeHtml(store.id) + '</span>' +
+              '<span class="store-option__name">' + escapeHtml(store.nombre) + '</span>' +
+            '</span>';
+          container.appendChild(option);
+          option.querySelector('input').addEventListener('change', function (e) {
+            if (e.target.checked) self.selectedStores[store.id] = true;
+            else delete self.selectedStores[store.id];
+            option.classList.toggle('is-checked', e.target.checked);
+            self.syncSelectAll();
+            self.clearError('tiendas');
+          });
+        });
+        this.syncSelectAll();
+      };
+
+      LineForm.prototype.syncSelectAll = function () {
+        var available = this.getAvailableStores();
+        var all = this.el('store-all');
+        if (!all) return;
+        all.checked = available.length > 0 && available.every(function (s) {
+          return !!this.selectedStores[s.id];
+        }, this);
+      };
+
+      LineForm.prototype.clearError = function (key) {
+        var err = this.el(key + '-error');
+        var input = this.el(key);
+        if (err) { err.hidden = true; err.textContent = ''; }
+        if (input) input.classList.remove('invalid');
+      };
+
+      LineForm.prototype.clearErrors = function () {
+        ['consignatario', 'linea', 'descripcion', 'tiendas'].forEach(this.clearError.bind(this));
+      };
+
+      LineForm.prototype.setError = function (key, message) {
+        var err = this.el(key + '-error');
+        var input = this.el(key);
+        if (err) { err.hidden = false; err.textContent = message; }
+        if (input) input.classList.add('invalid');
+      };
+
+      LineForm.prototype.reset = function () {
+        this.clearErrors();
+        this.selectedStores = {};
+        if (!this.lockKeys) this.el('consignatario').value = '';
+        if (!this.lockKeys) this.el('linea').value = '';
+        this.el('descripcion').value = '';
+        this.renderStores();
+      };
+
+      LineForm.prototype.loadData = function (rec) {
+        this.clearErrors();
+        this.el('consignatario').value = rec.consignatario;
+        this.el('linea').value = rec.linea;
+        this.el('descripcion').value = rec.descripcion;
+        this.selectedStores = {};
+        (rec.tiendas || []).forEach(function (id) { this.selectedStores[id] = true; }, this);
+        this.renderStores();
+      };
+
+      LineForm.prototype.validate = function () {
+        this.clearErrors();
+        var ok = true;
+        var consignatario = this.el('consignatario').value;
+        var lineaRaw = this.el('linea').value;
+        var linea = Number(lineaRaw);
+        var descripcion = this.el('descripcion').value.trim();
+        var storeIds = Object.keys(this.selectedStores);
+
+        if (!consignatario) {
+          this.setError('consignatario', 'Selecciona un consignatario.');
+          ok = false;
+        }
+
+        if (!this.lockKeys) {
+          if (!lineaRaw || !Number.isInteger(linea) || linea < 1) {
+            this.setError('linea', 'Ingresa un número entero mayor o igual a 1.');
+            ok = false;
+          } else if (Store.lineExists(consignatario, linea)) {
+            this.setError('linea', 'La línea ya existe para este consignatario.');
+            ok = false;
+          }
+        }
+
+        if (!descripcion) {
+          this.setError('descripcion', 'La descripción es obligatoria.');
+          ok = false;
+        } else if (descripcion.length > DESC_MAX) {
+          this.setError('descripcion', 'Máximo ' + DESC_MAX + ' caracteres.');
+          ok = false;
+        } else if (!/^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñÜü .,'\-]+$/.test(descripcion)) {
+          this.setError('descripcion', 'Usa solo caracteres alfanuméricos y puntuación básica.');
+          ok = false;
+        }
+
+        if (!storeIds.length) {
+          this.setError('tiendas', 'Asigna al menos una tienda.');
+          ok = false;
+        } else {
+          var excludeId = this.mode === 'edit' ? editingId : null;
+          for (var i = 0; i < storeIds.length; i++) {
+            var conflict = Store.findLineWithStore(consignatario, storeIds[i], excludeId);
+            if (conflict) {
+              this.setError('tiendas', 'La tienda ' + storeIds[i] + ' ya pertenece a la línea ' + conflict.linea + '.');
+              ok = false;
+              break;
+            }
+          }
+        }
+
+        return ok;
+      };
+
+      LineForm.prototype.getValues = function () {
+        return {
+          consignatario: this.el('consignatario').value,
+          linea: Number(this.el('linea').value),
+          descripcion: this.el('descripcion').value.trim(),
+          tiendas: Object.keys(this.selectedStores)
+        };
+      };
+
+      /* ---- Listado ---- */
+      function getFilteredRecords() {
+        var rows = Store.getActive().map(decorate).filter(function (row) {
+          return COLUMNS.every(function (col) {
+            var f = (listState.filters[col.key] || '').trim().toLowerCase();
+            if (!f) return true;
+            var val;
+            if (col.key === 'updatedAt' || col.key === 'createdAt') val = formatDateTime(row[col.key]).toLowerCase();
+            else val = String(row[col.key] == null ? '' : row[col.key]).toLowerCase();
+            return val.indexOf(f) !== -1;
+          });
+        });
+
+        if (listState.sortKey) {
+          var key = listState.sortKey;
+          var mul = listState.sortDir === 'asc' ? 1 : -1;
+          rows.sort(function (a, b) {
+            var av = a[key], bv = b[key];
+            if (key === 'linea' || key === 'tiendasCount') return (Number(av) - Number(bv)) * mul;
+            if (key === 'updatedAt' || key === 'createdAt') return (new Date(av) - new Date(bv)) * mul;
+            return String(av == null ? '' : av).localeCompare(String(bv == null ? '' : bv), 'es') * mul;
+          });
+        }
+        return rows;
+      }
+
+      function renderTableHead() {
+        var head = document.getElementById('listTableHead');
+        var filterRow = document.getElementById('listTableFilterRow');
+        head.innerHTML = '';
+        filterRow.innerHTML = '';
+
+        COLUMNS.forEach(function (col) {
+          if (!col.visible) return;
+          var th = document.createElement('th');
+          th.className = 'sortable';
+          th.dataset.col = col.key;
+          var icon = '';
+          if (listState.sortKey === col.key) {
+            icon = '<i class="pi ' + (listState.sortDir === 'asc' ? 'pi-sort-amount-up-alt' : 'pi-sort-amount-down') + ' sort-icon is-active" aria-hidden="true"></i>';
+          }
+          th.innerHTML = '<span class="col-header-content"><span class="col-header-text">' + escapeHtml(col.label) + '</span>' + icon + '</span>';
+          th.addEventListener('click', function () {
+            if (listState.sortKey === col.key) {
+              listState.sortDir = listState.sortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+              listState.sortKey = col.key;
+              listState.sortDir = 'asc';
+            }
+            renderList();
+          });
+          head.appendChild(th);
+
+          var fth = document.createElement('th');
+          fth.className = 'filter-cell';
+          var field = document.createElement('div');
+          field.className = 'table-filter-field';
+          var inp = document.createElement('input');
+          inp.type = 'text';
+          inp.className = 'table-filter-input';
+          inp.value = listState.filters[col.key] || '';
+          inp.setAttribute('aria-label', 'Filtro de columna: ' + col.label);
+          inp.addEventListener('input', function () {
+            listState.filters[col.key] = inp.value;
+            listState.page = 1;
+            renderTableBody();
+          });
+          field.appendChild(inp);
+          fth.appendChild(field);
+          filterRow.appendChild(fth);
+        });
+
+        var actH = document.createElement('th');
+        actH.className = 'col-actions';
+        actH.innerHTML = '';
+        head.appendChild(actH);
+        var actF = document.createElement('th');
+        actF.className = 'col-actions filter-cell';
+        filterRow.appendChild(actF);
+      }
+
+      function renderTableBody() {
+        var filtered = getFilteredRecords();
+        var totalPages = Math.max(1, Math.ceil(filtered.length / listState.pageSize));
+        if (listState.page > totalPages) listState.page = totalPages;
+        var start = (listState.page - 1) * listState.pageSize;
+        var pageRows = filtered.slice(start, start + listState.pageSize);
+
+        var summaryEl = document.getElementById('listSummary');
+        if (!filtered.length) summaryEl.textContent = 'No se encontraron resultados.';
+        else {
+          summaryEl.textContent = 'Mostrando ' + (start + 1) + '-' +
+            Math.min(start + listState.pageSize, filtered.length) + ' de ' + filtered.length +
+            ' elemento' + (filtered.length === 1 ? '' : 's') + '.';
+        }
+
+        var body = document.getElementById('listTableBody');
+        body.innerHTML = '';
+        var visibleCols = COLUMNS.filter(function (c) { return c.visible; }).length;
+
+        if (!pageRows.length) {
+          var emptyTr = document.createElement('tr');
+          var emptyTd = document.createElement('td');
+          emptyTd.colSpan = visibleCols + 1;
+          emptyTd.textContent = 'No hay registros para mostrar.';
+          emptyTd.style.textAlign = 'center';
+          emptyTd.style.padding = '2rem';
+          emptyTr.appendChild(emptyTd);
+          body.appendChild(emptyTr);
+        } else {
+          pageRows.forEach(function (row) {
+            var tr = document.createElement('tr');
+            COLUMNS.forEach(function (col) {
+              if (!col.visible) return;
+              var td = document.createElement('td');
+              if (col.key === 'updatedAt' || col.key === 'createdAt') {
+                td.textContent = formatDateTime(row[col.key]);
+              } else if (col.key === 'tiendasCount') {
+                var tip = document.createElement('span');
+                tip.className = 'stores-count';
+                tip.tabIndex = 0;
+                tip.textContent = String(row.tiendasCount);
+                tip.setAttribute('data-tooltip', buildStoresTooltip(row));
+                tip.setAttribute('aria-label', 'Tiendas asignadas a la línea ' + row.linea + ': ' + buildStoresTooltip(row).replace(/\n/g, ', '));
+                td.appendChild(tip);
+              } else {
+                td.textContent = row[col.key];
+              }
+              tr.appendChild(td);
+            });
+
+            var actTd = document.createElement('td');
+            actTd.className = 'col-actions';
+            actTd.innerHTML =
+              '<div class="row-actions">' +
+                '<button type="button" class="table-action-btn" data-action="detail" data-id="' + row.id + '" title="Ver detalle" aria-label="Ver detalle"><i class="pi pi-eye"></i></button>' +
+                '<button type="button" class="table-action-btn" data-action="edit" data-id="' + row.id + '" title="Editar" aria-label="Editar"><i class="pi pi-pencil"></i></button>' +
+                '<button type="button" class="table-action-btn table-action-btn--danger" data-action="delete" data-id="' + row.id + '" title="Eliminar" aria-label="Eliminar"><i class="pi pi-trash"></i></button>' +
+              '</div>';
+            tr.appendChild(actTd);
+            body.appendChild(tr);
+          });
+        }
+
+        renderPagination(totalPages);
+      }
+
+      function renderPagination(totalPages) {
+        var pager = document.querySelector('#listView .table-paginator');
+        if (pager) pager.style.display = totalPages > 1 ? '' : 'none';
+        document.getElementById('pagFirst').disabled = listState.page <= 1;
+        document.getElementById('pagPrev').disabled = listState.page <= 1;
+        document.getElementById('pagNext').disabled = listState.page >= totalPages;
+        document.getElementById('pagLast').disabled = listState.page >= totalPages;
+        var pages = document.getElementById('pagPages');
+        pages.innerHTML = '';
+        for (var i = 1; i <= totalPages; i++) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'table-pag-btn' + (i === listState.page ? ' is-active' : '');
+          btn.textContent = i;
+          if (i === listState.page) btn.setAttribute('aria-current', 'page');
+          btn.addEventListener('click', (function (p) {
+            return function () { listState.page = p; renderList(); };
+          })(i));
+          pages.appendChild(btn);
+        }
+      }
+
+      function renderList() {
+        renderTableHead();
+        renderTableBody();
+      }
+
+      /* ---- Column chooser / export ---- */
+      function buildColChooser() {
+        var panel = document.getElementById('listColChooserPanel');
+        panel.innerHTML = '';
+        var items = document.createElement('div');
+        items.className = 'col-chooser-inline__items';
+        COLUMNS.forEach(function (col, idx) {
+          var label = document.createElement('label');
+          label.className = 'col-chooser-inline__item';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = col.visible;
+          cb.dataset.colIndex = idx;
+          var span = document.createElement('span');
+          span.textContent = col.label;
+          label.appendChild(cb);
+          label.appendChild(span);
+          items.appendChild(label);
+        });
+        panel.appendChild(items);
+        var apply = document.createElement('button');
+        apply.type = 'button';
+        apply.className = 'btn btn-success';
+        apply.textContent = 'Aplicar';
+        panel.appendChild(apply);
+
+        function updateApplyState() {
+          var any = Array.prototype.some.call(items.querySelectorAll('input'), function (c) { return c.checked; });
+          apply.disabled = !any;
+        }
+        items.querySelectorAll('input').forEach(function (cb) {
+          cb.addEventListener('change', updateApplyState);
+        });
+        apply.addEventListener('click', function () {
+          items.querySelectorAll('input').forEach(function (cb) {
+            COLUMNS[Number(cb.dataset.colIndex)].visible = cb.checked;
+          });
+          panel.classList.add('hidden');
+          document.getElementById('listColChooserBtn').setAttribute('aria-expanded', 'false');
+          renderList();
+        });
+        updateApplyState();
+      }
+
+      function buildExportMenu() {
+        var panel = document.getElementById('exportMenuPanel');
+        panel.innerHTML = '';
+        EXPORT_FORMATS.forEach(function (fmt) {
+          var item = document.createElement('button');
+          item.type = 'button';
+          item.className = 'export-menu__item';
+          item.setAttribute('role', 'menuitem');
+          item.innerHTML = '<i class="pi ' + fmt.icon + ' export-menu__icon--' + fmt.color + '" aria-hidden="true"></i><span>' + fmt.label + '</span>';
+          item.addEventListener('click', function () {
+            closeExportMenu();
+            exportRecords(fmt.id);
+          });
+          panel.appendChild(item);
+        });
+      }
+
+      function closeExportMenu() {
+        document.getElementById('exportMenuPanel').classList.add('hidden');
+        document.getElementById('exportBtn').setAttribute('aria-expanded', 'false');
+      }
+
+      function exportRecords(format) {
+        var rows = getFilteredRecords();
+        var cols = COLUMNS.filter(function (c) { return c.visible; });
+        var headers = cols.map(function (c) { return c.label; });
+        var keys = cols.map(function (c) { return c.key; });
+        var lines = rows.map(function (r) {
+          return keys.map(function (k) {
+            if (k === 'updatedAt' || k === 'createdAt') return formatDateTime(r[k]);
+            return r[k];
+          });
+        });
+        var filename = 'catalogo-lineas-por-tienda';
+        var blob;
+        if (format === 'csv' || format === 'xls' || format === 'xlsx') {
+          var csv = [headers.join(',')].concat(lines.map(function (l) {
+            return l.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
+          })).join('\n');
+          blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+          filename += format === 'xlsx' ? '.xlsx' : (format === 'xls' ? '.xls' : '.csv');
+        } else if (format === 'html') {
+          var html = '<html><head><meta charset="utf-8"><title>Catálogo de líneas por tienda</title></head><body><table border="1"><thead><tr>' +
+            headers.map(function (h) { return '<th>' + escapeHtml(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+            lines.map(function (l) {
+              return '<tr>' + l.map(function (v) { return '<td>' + escapeHtml(v) + '</td>'; }).join('') + '</tr>';
+            }).join('') + '</tbody></table></body></html>';
+          blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+          filename += '.html';
+        } else if (format === 'text') {
+          var txt = [headers.join('\t')].concat(lines.map(function (l) { return l.join('\t'); })).join('\n');
+          blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+          filename += '.txt';
+        } else {
+          var pdfTxt = 'Catálogo de líneas por tienda\n\n' + [headers.join(' | ')].concat(lines.map(function (l) { return l.join(' | '); })).join('\n');
+          blob = new Blob([pdfTxt], { type: 'application/pdf' });
+          filename += '.pdf';
+        }
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      /* ---- Detalle / CRUD ---- */
+      function buildStoresTooltip(row) {
+        var stores = row.tiendas || [];
+        if (!stores.length) return 'Sin tiendas asignadas';
+        return stores.map(function (sid) {
+          var s = storeById(sid);
+          return sid + (s ? ' ' + s.nombre : '');
+        }).join('\n');
+      }
+
+      function renderDetail(rec) {
+        var rows = [
+          ['Consignatario', consignatarioName(rec.consignatario)],
+          ['Línea', String(rec.linea)],
+          ['Descripción', rec.descripcion],
+          ['Actualizado por', rec.updatedBy || '—'],
+          ['Actualizado', formatDateTimeLong(rec.updatedAt)],
+          ['Creado', formatDateTimeLong(rec.createdAt)]
+        ];
+        var tableHtml = '<table class="detail-table"><tbody>' +
+          rows.map(function (r) {
+            return '<tr><th>' + escapeHtml(r[0]) + '</th><td>' + escapeHtml(r[1]) + '</td></tr>';
+          }).join('') + '</tbody></table>';
+
+        var stores = rec.tiendas || [];
+        var storeRows = stores.map(function (sid) {
+          var s = storeById(sid);
+          return '<tr><td>' + escapeHtml(sid) + '</td><td>' + escapeHtml(s ? s.nombre : '—') + '</td></tr>';
+        }).join('');
+
+        var storesHtml =
+          '<div class="section-head"><h2 class="section-title">Detalle de tiendas</h2></div>' +
+          '<div class="detail-count">Mostrando ' + (stores.length ? ('1-' + stores.length + ' de ' + stores.length) : '0') +
+            ' elemento' + (stores.length === 1 ? '' : 's') + '.</div>' +
+          '<table class="detail-store-table"><thead><tr><th>ID tienda</th><th>Nombre</th></tr></thead><tbody>' +
+          (stores.length ? storeRows : '<tr><td colspan="2" style="text-align:center;padding:1.5rem;">Sin tiendas asignadas.</td></tr>') +
+          '</tbody></table>';
+
+        document.getElementById('detailFormRoot').innerHTML = tableHtml + storesHtml;
+      }
+
+      function openCreate() {
+        forms.create.reset();
+        showView('create');
+      }
+
+      function openEdit(id) {
+        var rec = Store.getById(id);
+        if (!rec) return;
+        editingId = id;
+        forms.edit.loadData(rec);
+        var title = 'Editar línea ' + rec.linea;
+        document.getElementById('editPageTitle').textContent = title;
+        document.getElementById('editBreadcrumbCurrent').textContent = title;
+        showView('edit');
+      }
+
+      function openDetail(id) {
+        var rec = Store.getById(id);
+        if (!rec) return;
+        lastDetailId = id;
+        renderDetail(rec);
+        var title = 'Detalle de línea ' + rec.linea;
+        document.getElementById('detailPageTitle').textContent = title;
+        document.getElementById('detailBreadcrumbCurrent').textContent = title;
+        showView('detail');
+      }
+
+      function submitCreate() {
+        var form = forms.create;
+        if (!form.validate()) return;
+        var values = form.getValues();
+        var now = new Date().toISOString();
+        var rec = Store.create({
+          id: uid(),
+          consignatario: values.consignatario,
+          linea: values.linea,
+          descripcion: values.descripcion,
+          tiendas: values.tiendas,
+          updatedBy: CURRENT_USER,
+          updatedAt: now,
+          createdAt: now,
+          deleted: false
+        });
+        showToast('El registro se ha creado correctamente.', 'MSG001');
+        openDetail(rec.id);
+      }
+
+      function submitEdit() {
+        var form = forms.edit;
+        if (!form.validate()) return;
+        var values = form.getValues();
+        var now = new Date().toISOString();
+        Store.update(editingId, {
+          descripcion: values.descripcion,
+          tiendas: values.tiendas,
+          updatedBy: CURRENT_USER,
+          updatedAt: now
+        });
+        showToast('El registro se ha actualizado correctamente.', 'MSG002');
+        var savedId = editingId;
+        editingId = null;
+        openDetail(savedId);
+      }
+
+      /* ---- Importar líneas (wizard) ---- */
+      function normalizeHeader(h) {
+        return String(h || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '')
+          .trim();
+      }
+
+      function setImportStep(step) {
+        bulkState.step = step;
+        [1, 2].forEach(function (n) {
+          var el = document.getElementById('importStep' + n);
+          el.classList.toggle('is-active', n === step);
+          el.classList.toggle('is-done', n < step);
+        });
+      }
+
+      function updateImportColumnsState() {
+        var hasFile = !!bulkState.file && bulkState.headers.length > 0;
+        var mappingOk = IMPORT_FIELDS.every(function (f) { return !!bulkState.mapping[f.key]; });
+        var canImport = hasFile && mappingOk && bulkState.rows.length > 0;
+        document.getElementById('importColImport').classList.toggle('is-disabled', !canImport);
+        document.getElementById('bulkProcessBtn').disabled = !canImport;
+      }
+
+      function resetBulk() {
+        bulkState = {
+          step: 1,
+          file: null,
+          headers: [],
+          rows: [],
+          mapping: { consignatario: '', linea: '', descripcion: '', tienda: '' }
+        };
+        document.getElementById('bulkFileInput').value = '';
+        document.getElementById('bulkFileChip').hidden = true;
+        document.getElementById('bulkFileName').textContent = '';
+        document.getElementById('bulkFileName').removeAttribute('title');
+        document.getElementById('bulkFileError').hidden = true;
+        document.getElementById('bulkHasHeader').checked = true;
+        document.getElementById('bulkOffset').value = '0';
+        document.getElementById('bulkSummary').classList.add('view-hidden');
+        document.getElementById('bulkRejectedWrap').hidden = true;
+        document.getElementById('bulkRejectedTitle').hidden = true;
+        populateMappingSelects([]);
+        setImportStep(1);
+        updateImportColumnsState();
+      }
+
+      function openBulk() {
+        resetBulk();
+        showView('bulk');
+      }
+
+      function populateMappingSelects(headers) {
+        IMPORT_FIELDS.forEach(function (field) {
+          var sel = document.getElementById('map-' + field.key);
+          var current = bulkState.mapping[field.key] || '';
+          sel.innerHTML = '';
+          var empty = document.createElement('option');
+          empty.value = '';
+          empty.textContent = '(Sin información)';
+          sel.appendChild(empty);
+          headers.forEach(function (h) {
+            var opt = document.createElement('option');
+            opt.value = h;
+            opt.textContent = h;
+            if (h === current) opt.selected = true;
+            sel.appendChild(opt);
+          });
+          if (!current || headers.indexOf(current) === -1) sel.value = '';
+          bulkState.mapping[field.key] = sel.value;
+        });
+      }
+
+      function autoMapHeaders(headers) {
+        var used = {};
+        IMPORT_FIELDS.forEach(function (field) {
+          var match = headers.find(function (h) {
+            var n = normalizeHeader(h);
+            return field.aliases.indexOf(n) !== -1 && !used[h];
+          });
+          bulkState.mapping[field.key] = match || '';
+          if (match) used[match] = true;
+        });
+        populateMappingSelects(headers);
+      }
+
+      function readWorkbookSheet(file) {
+        return new Promise(function (resolve, reject) {
+          if (typeof XLSX === 'undefined') {
+            reject(new Error('No se pudo cargar el lector de Excel.'));
+            return;
+          }
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            try {
+              var data = new Uint8Array(e.target.result);
+              var workbook = XLSX.read(data, { type: 'array' });
+              resolve(workbook.Sheets[workbook.SheetNames[0]]);
+            } catch (err) {
+              reject(err);
+            }
+          };
+          reader.onerror = function () { reject(new Error('No se pudo leer el archivo.')); };
+          reader.readAsArrayBuffer(file);
+        });
+      }
+
+      function parseSheetToDataset(sheet) {
+        var hasHeader = document.getElementById('bulkHasHeader').checked;
+        var offset = Math.max(0, parseInt(document.getElementById('bulkOffset').value, 10) || 0);
+        var matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+        if (!matrix.length) return { headers: [], rows: [] };
+
+        var headers;
+        var dataStart;
+        if (hasHeader) {
+          headers = matrix[0].map(function (h, i) {
+            var label = String(h == null ? '' : h).trim();
+            return label || ('Columna ' + (i + 1));
+          });
+          dataStart = 1 + offset;
+        } else {
+          var width = matrix.reduce(function (max, row) { return Math.max(max, row.length); }, 0);
+          headers = [];
+          for (var c = 0; c < width; c++) headers.push('Columna ' + (c + 1));
+          dataStart = offset;
+        }
+
+        var rows = [];
+        for (var r = dataStart; r < matrix.length; r++) {
+          var src = matrix[r] || [];
+          var empty = src.every(function (cell) { return String(cell == null ? '' : cell).trim() === ''; });
+          if (empty) continue;
+          var obj = {};
+          headers.forEach(function (h, i) { obj[h] = src[i] == null ? '' : src[i]; });
+          obj.__rowNumber = r + 1;
+          rows.push(obj);
+        }
+        return { headers: headers, rows: rows };
+      }
+
+      function mapBulkRow(raw, index) {
+        var m = bulkState.mapping;
+        return {
+          rowNumber: raw.__rowNumber || (index + 2),
+          consignatario: raw[m.consignatario],
+          linea: raw[m.linea],
+          descripcion: raw[m.descripcion],
+          tienda: raw[m.tienda]
+        };
+      }
+
+      function processBulkRows(rawRows) {
+        var created = 0;
+        var updated = 0;
+        var rejected = [];
+        var now = new Date().toISOString();
+
+        rawRows.forEach(function (raw, idx) {
+          var row = mapBulkRow(raw, idx);
+          var cons = consignatarioByLabel(row.consignatario);
+          var store = storeByLabel(row.tienda);
+          var lineaNum = Number(String(row.linea == null ? '' : row.linea).trim());
+          var descripcion = String(row.descripcion || '').trim();
+
+          if (!cons) {
+            rejected.push({ row: row.rowNumber, consignatario: row.consignatario, linea: row.linea, tienda: row.tienda, motivo: 'Consignatario no registrado.' });
+            return;
+          }
+          if (!Number.isInteger(lineaNum) || lineaNum < 1) {
+            rejected.push({ row: row.rowNumber, consignatario: row.consignatario, linea: row.linea, tienda: row.tienda, motivo: 'Línea inválida (entero ≥ 1).' });
+            return;
+          }
+          if (!descripcion || descripcion.length > DESC_MAX) {
+            rejected.push({ row: row.rowNumber, consignatario: row.consignatario, linea: row.linea, tienda: row.tienda, motivo: 'Descripción obligatoria (máx. 50).' });
+            return;
+          }
+          if (!store) {
+            rejected.push({ row: row.rowNumber, consignatario: row.consignatario, linea: row.linea, tienda: row.tienda, motivo: 'Tienda no registrada.' });
+            return;
+          }
+          if (store.consignatario !== cons.id) {
+            rejected.push({ row: row.rowNumber, consignatario: row.consignatario, linea: row.linea, tienda: row.tienda, motivo: 'La tienda no pertenece al consignatario.' });
+            return;
+          }
+
+          var line = Store.findByConsignatarioLinea(cons.id, lineaNum);
+          var lineCreated = false;
+          var touchedExisting = false;
+          if (!line) {
+            line = Store.create({
+              id: uid(),
+              consignatario: cons.id,
+              linea: lineaNum,
+              descripcion: descripcion,
+              tiendas: [],
+              updatedBy: CURRENT_USER,
+              updatedAt: now,
+              createdAt: now,
+              deleted: false
+            });
+            lineCreated = true;
+            created += 1;
+          } else if (line.descripcion !== descripcion) {
+            Store.update(line.id, {
+              descripcion: descripcion,
+              updatedBy: CURRENT_USER,
+              updatedAt: now
+            });
+            line = Store.getById(line.id);
+            touchedExisting = true;
+          }
+
+          var owner = Store.findLineWithStore(cons.id, store.id);
+          if (owner && owner.id === line.id) {
+            if (touchedExisting) updated += 1;
+            return;
+          }
+
+          if (owner) {
+            var remaining = (owner.tiendas || []).filter(function (id) { return id !== store.id; });
+            Store.update(owner.id, {
+              tiendas: remaining,
+              updatedBy: CURRENT_USER,
+              updatedAt: now
+            });
+          }
+
+          var fresh = Store.getById(line.id);
+          var nextStores = (fresh.tiendas || []).slice();
+          if (nextStores.indexOf(store.id) === -1) nextStores.push(store.id);
+          Store.update(line.id, {
+            tiendas: nextStores,
+            descripcion: descripcion,
+            updatedBy: CURRENT_USER,
+            updatedAt: now
+          });
+
+          if (!lineCreated) updated += 1;
+        });
+
+        return { created: created, updated: updated, rejected: rejected };
+      }
+
+      function renderBulkSummary(result) {
+        document.getElementById('bulkCreatedCount').textContent = String(result.created);
+        document.getElementById('bulkUpdatedCount').textContent = String(result.updated);
+        document.getElementById('bulkRejectedCount').textContent = String(result.rejected.length);
+        document.getElementById('bulkSummary').classList.remove('view-hidden');
+
+        var wrap = document.getElementById('bulkRejectedWrap');
+        var title = document.getElementById('bulkRejectedTitle');
+        var body = document.getElementById('bulkRejectedBody');
+        if (!result.rejected.length) {
+          wrap.hidden = true;
+          title.hidden = true;
+          body.innerHTML = '';
+          return;
+        }
+        title.hidden = false;
+        wrap.hidden = false;
+        body.innerHTML = result.rejected.map(function (r) {
+          return '<tr>' +
+            '<td>' + escapeHtml(r.row) + '</td>' +
+            '<td>' + escapeHtml(r.consignatario) + '</td>' +
+            '<td>' + escapeHtml(r.linea) + '</td>' +
+            '<td>' + escapeHtml(r.tienda) + '</td>' +
+            '<td>' + escapeHtml(r.motivo) + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      async function reparseCurrentFile() {
+        if (!bulkState.file) return;
+        var err = document.getElementById('bulkFileError');
+        err.hidden = true;
+        document.getElementById('bulkSummary').classList.add('view-hidden');
+        setImportStep(1);
+        try {
+          var sheet = await readWorkbookSheet(bulkState.file);
+          var parsed = parseSheetToDataset(sheet);
+          bulkState.headers = parsed.headers;
+          bulkState.rows = parsed.rows;
+          autoMapHeaders(parsed.headers);
+          var nameEl = document.getElementById('bulkFileName');
+          var chip = document.getElementById('bulkFileChip');
+          nameEl.textContent = bulkState.file.name;
+          nameEl.title = bulkState.file.name;
+          chip.hidden = false;
+          if (!parsed.rows.length) {
+            err.textContent = 'El archivo no contiene filas de datos con la configuración actual.';
+            err.hidden = false;
+          }
+          updateImportColumnsState();
+        } catch (e) {
+          err.textContent = 'No fue posible interpretar el archivo. Verifica el formato.';
+          err.hidden = false;
+          updateImportColumnsState();
+        }
+      }
+
+      async function handleBulkFile(file) {
+        var err = document.getElementById('bulkFileError');
+        err.hidden = true;
+        if (!file) return;
+        var name = file.name.toLowerCase();
+        if (!/\.(xlsx|xls)$/.test(name)) {
+          err.textContent = 'Selecciona un archivo Excel (.xlsx o .xls).';
+          err.hidden = false;
+          return;
+        }
+        bulkState.file = file;
+        document.getElementById('bulkSummary').classList.add('view-hidden');
+        setImportStep(1);
+        await reparseCurrentFile();
+      }
+
+
+      /* ---- Init ---- */
+      function initForms() {
+        forms.create = new LineForm('create', 'create');
+        forms.create.mount(document.getElementById('createFormRoot'));
+        forms.edit = new LineForm('edit', 'edit');
+        forms.edit.mount(document.getElementById('editFormRoot'));
+      }
+
+      document.getElementById('goCreateBtn').addEventListener('click', openCreate);
+      document.getElementById('goBulkBtn').addEventListener('click', openBulk);
+      document.getElementById('createSubmitBtn').addEventListener('click', submitCreate);
+      document.getElementById('editSubmitBtn').addEventListener('click', submitEdit);
+      document.getElementById('detailEditBtn').addEventListener('click', function () {
+        if (lastDetailId) openEdit(lastDetailId);
+      });
+
+      document.querySelectorAll('[data-nav="list"]').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          editingId = null;
+          showView('list');
+        });
+      });
+
+      document.getElementById('listTableBody').addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var id = btn.dataset.id;
+        if (btn.dataset.action === 'edit') openEdit(id);
+        else if (btn.dataset.action === 'detail') openDetail(id);
+        else if (btn.dataset.action === 'delete') {
+          deletingId = id;
+          var rec = Store.getById(id);
+          document.getElementById('deleteModalTitle').textContent =
+            'Eliminar línea' + (rec ? ' ' + rec.linea : '');
+          document.getElementById('deleteModalBody').textContent =
+            '¿Estás seguro de eliminar este registro? Esta acción no puede revertirse.';
+          document.getElementById('deleteModal').classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('deleteCancelBtn').addEventListener('click', function () {
+        deletingId = null;
+        document.getElementById('deleteModal').classList.add('hidden');
+      });
+      document.getElementById('deleteConfirmBtn').addEventListener('click', function () {
+        if (deletingId) Store.softDelete(deletingId);
+        deletingId = null;
+        document.getElementById('deleteModal').classList.add('hidden');
+        showToast('El registro se ha eliminado correctamente.', 'MSG005');
+        showView('list');
+      });
+
+      document.getElementById('deleteModal').addEventListener('click', function (e) {
+        if (e.target.id === 'deleteModal') {
+          deletingId = null;
+          document.getElementById('deleteModal').classList.add('hidden');
+        }
+      });
+
+      /* Tooltip flotante */
+      var tooltipEl = document.createElement('div');
+      tooltipEl.className = 'app-tooltip';
+      tooltipEl.setAttribute('role', 'tooltip');
+      document.body.appendChild(tooltipEl);
+
+      function showTooltip(target) {
+        var text = target.getAttribute('data-tooltip');
+        if (!text) return;
+        tooltipEl.textContent = text;
+        tooltipEl.style.display = 'block';
+        var r = target.getBoundingClientRect();
+        var tw = tooltipEl.offsetWidth;
+        var th = tooltipEl.offsetHeight;
+        var gap = 8;
+        var placement = 'top';
+        var top = r.top - th - gap;
+        if (top < 4) { placement = 'bottom'; top = r.bottom + gap; }
+        var left = r.left + (r.width / 2) - (tw / 2);
+        left = Math.max(6, Math.min(left, document.documentElement.clientWidth - tw - 6));
+        tooltipEl.setAttribute('data-placement', placement);
+        tooltipEl.style.top = top + 'px';
+        tooltipEl.style.left = left + 'px';
+        tooltipEl.classList.add('is-visible');
+      }
+      function hideTooltip() { tooltipEl.classList.remove('is-visible'); }
+      document.addEventListener('mouseover', function (e) {
+        var t = e.target.closest('[data-tooltip]');
+        if (t) showTooltip(t);
+      });
+      document.addEventListener('mouseout', function (e) {
+        if (e.target.closest('[data-tooltip]')) hideTooltip();
+      });
+      document.addEventListener('focusin', function (e) {
+        var t = e.target.closest('[data-tooltip]');
+        if (t) showTooltip(t);
+      });
+      document.addEventListener('focusout', hideTooltip);
+      document.addEventListener('scroll', hideTooltip, true);
+
+      document.getElementById('listColChooserBtn').addEventListener('click', function (e) {
+        e.preventDefault();
+        var panel = document.getElementById('listColChooserPanel');
+        var willOpen = panel.classList.contains('hidden');
+        if (willOpen) buildColChooser();
+        panel.classList.toggle('hidden', !willOpen);
+        this.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      });
+
+      document.getElementById('exportBtn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        var panel = document.getElementById('exportMenuPanel');
+        var willOpen = panel.classList.contains('hidden');
+        panel.classList.toggle('hidden');
+        this.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      });
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('.export-menu')) closeExportMenu();
+      });
+
+      document.getElementById('pageSizeSelect').addEventListener('change', function () {
+        listState.pageSize = Number(this.value);
+        listState.page = 1;
+        renderList();
+      });
+      document.getElementById('pagFirst').addEventListener('click', function () { listState.page = 1; renderList(); });
+      document.getElementById('pagPrev').addEventListener('click', function () { listState.page--; renderList(); });
+      document.getElementById('pagNext').addEventListener('click', function () { listState.page++; renderList(); });
+      document.getElementById('pagLast').addEventListener('click', function () {
+        listState.page = Math.ceil(getFilteredRecords().length / listState.pageSize) || 1;
+        renderList();
+      });
+
+      var fileInput = document.getElementById('bulkFileInput');
+      document.getElementById('bulkPickBtn').addEventListener('click', function () { fileInput.click(); });
+      fileInput.addEventListener('change', function () {
+        if (fileInput.files && fileInput.files[0]) handleBulkFile(fileInput.files[0]);
+      });
+      document.getElementById('bulkFileClearBtn').addEventListener('click', function () {
+        resetBulk();
+      });
+      document.getElementById('bulkHasHeader').addEventListener('change', function () {
+        if (bulkState.file) reparseCurrentFile();
+      });
+      document.getElementById('bulkOffset').addEventListener('change', function () {
+        if (bulkState.file) reparseCurrentFile();
+      });
+
+      IMPORT_FIELDS.forEach(function (field) {
+        document.getElementById('map-' + field.key).addEventListener('change', function () {
+          bulkState.mapping[field.key] = this.value;
+          updateImportColumnsState();
+        });
+      });
+
+      document.querySelectorAll('[data-focus-map]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var target = document.getElementById(btn.getAttribute('data-focus-map'));
+          if (target) { target.focus(); target.click(); }
+        });
+      });
+
+      document.getElementById('bulkProcessBtn').addEventListener('click', function () {
+        if (!bulkState.rows.length) return;
+        if (!IMPORT_FIELDS.every(function (f) { return !!bulkState.mapping[f.key]; })) {
+          showToast('Mapea todos los campos obligatorios antes de importar.', 'Importar líneas', 'warn');
+          return;
+        }
+        setImportStep(2);
+        var result = processBulkRows(bulkState.rows);
+        renderBulkSummary(result);
+        showToast(
+          'Importación finalizada: ' + result.created + ' creados, ' +
+          result.updated + ' actualizados, ' + result.rejected.length + ' rechazados.',
+          'Importar líneas',
+          result.rejected.length && !result.created && !result.updated ? 'warn' : 'success'
+        );
+      });
+
+      initForms();
+      buildExportMenu();
+      Store.load();
+      renderList();
+    })();
+  </script>
+</body>
+</html>
